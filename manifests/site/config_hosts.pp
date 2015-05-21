@@ -35,20 +35,20 @@ define omd::site::config_hosts (
     content => template('omd/config_hosts.wato.erb'),
   }
 
-  concat { $hosts_file:
+  puppetlab-concat { $hosts_file:
     ensure => present,
     owner  => $site,
     group  => $site,
     mode   => '0660',
   }
 
-  concat::fragment { "${site} site's ${folder}/hosts.mk all_hosts begin":
+  puppetlab-concat::fragment { "${site} site's ${folder}/hosts.mk all_hosts begin":
     target  => $hosts_file,
     order   => '01',
     content => "### Managed by puppet.\n\n_lock='Puppet generated'\n\nall_hosts += [\n",
   }
 
-  concat::fragment { "${site} site's ${folder}/hosts.mk all_hosts end":
+  puppetlab-concat::fragment { "${site} site's ${folder}/hosts.mk all_hosts end":
     target  => $hosts_file,
     order   => '09',
     content => "]\n\n",
@@ -56,12 +56,12 @@ define omd::site::config_hosts (
 
   if ! $cluster {
     # adde multiline column (mieser Trick ;-)
-    concat::fragment { "${site} site's ${folder}/hosts.mk COMMENT OUT clusters begin":
+    puppetlab-concat::fragment { "${site} site's ${folder}/hosts.mk COMMENT OUT clusters begin":
       target  => $hosts_file,
       order   => '10',
       content => "'''\n",
     }
-    concat::fragment { "${site} site's ${folder}/hosts.mk COMMENT OUT clusters end":
+    puppetlab-concat::fragment { "${site} site's ${folder}/hosts.mk COMMENT OUT clusters end":
       target  => $hosts_file,
       order   => '19',
       content => "'''\n",
@@ -69,13 +69,13 @@ define omd::site::config_hosts (
   }
 
   $cluster_str = join( flatten([$folder, 'puppet_generated', 'cluster', $cluster_tags]), '|')
-  concat::fragment { "${site} site's ${folder}/hosts.mk clusters begin":
+  puppetlab-concat::fragment { "${site} site's ${folder}/hosts.mk clusters begin":
     target  => $hosts_file,
     order   => '11',
     content => "clusters.update({\n\"${cluster_str}\": [\n",
   }
 
-  concat::fragment { "${site} site's ${folder}/hosts.mk clusters end":
+  puppetlab-concat::fragment { "${site} site's ${folder}/hosts.mk clusters end":
     target  => $hosts_file,
     order   => '18',
     content => "] })\n",

@@ -21,7 +21,7 @@ define omd::host::export (
 
   $content_str = join( flatten([$fqdn, 'puppet_generated', $folder, $tags]), '|')
 
-  concat::fragment { "${site} site's ${folder}/hosts.mk entry for ${fqdn} (all_hosts)":
+  puppetlab-concat::fragment { "${site} site's ${folder}/hosts.mk entry for ${fqdn} (all_hosts)":
     target  => $hosts_file,
     content => "  \"${content_str}\",\n",
     order   => '05',
@@ -29,7 +29,7 @@ define omd::host::export (
   }
 
   if $cluster_member {
-    concat::fragment { "${site} site's ${folder}/hosts.mk entry for ${fqdn} (clusters)":
+    puppetlab-concat::fragment { "${site} site's ${folder}/hosts.mk entry for ${fqdn} (clusters)":
       target  => $hosts_file,
       content => " \"${fqdn}\",\n",
       order   => '15',
@@ -41,7 +41,7 @@ define omd::host::export (
     command     => "su - ${site} -c 'check_mk -I ${fqdn}'",
     refreshonly => true,
     path        => [ '/bin' ],
-    require     => Concat[$hosts_file],
+    require     => Puppetlab-Concat[$hosts_file],
   }
 
   # add the orderings and reinventorize trigger to the file trigger of the collected

@@ -37,11 +37,20 @@ define omd::host::export (
     }
   }
 
+  # Build a list of host -> number of services
+  if ! defined(Exec['count services per host']) {
+    exec { "count services per host":
+      command => "grep host_name /omd/sites/default/etc/nagios/conf.d/check_mk_objects.cfg|awk '{print $2}'|sort|uniq -c|awk '{print $2\" \"$1}'>/tmp/serviceperhost",
+    }
+  }
+  Exec['count services per host'] ->
   exec { "check_mk inventorize ${fqdn} for site ${site}":
     command     => "su - ${site} -c 'check_mk -I ${fqdn}'",
-    refreshonly => true,
     path        => [ '/bin' ],
     require     => Puppetlab-Concat[$hosts_file],
+    unless      => "grep '${fqdn} ..' /tmp/serviceperhost>/dev/null",
+    #unless      => "grep ${fqdn} /omd/sites/${site}/etc/nagios/conf.d/check_mk_objects.cfg|wc -l|grep ..>/dev/null", # Inventorise is less than 10 services
+
   }
 
   # add the orderings and reinventorize trigger to the file trigger of the collected
